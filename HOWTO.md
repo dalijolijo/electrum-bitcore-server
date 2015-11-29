@@ -12,7 +12,7 @@ requirements.
 
 The most up-to date version of this document is available at:
 
-    https://github.com/pooler/electrum-creditbit-server/blob/master/HOWTO.md
+    https://github.com/creditbit/electrum-creditbit-server/blob/master/HOWTO.md
 
 Conventions
 -----------
@@ -93,15 +93,13 @@ We currently recommend creditbitd 0.10.2.2 stable.
 
 If you prefer to compile creditbitd, here are some pointers for Ubuntu:
 
-    $ sudo apt-get install make g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config automake libtool
+    $ sudo apt-get install make g++ python-leveldb git build-essential libboost-all-dev libdb++-dev libminiupnpc-dev libcurl4-openssl-dev
     $ sudo su - creditbit
-    $ cd ~/src && git clone https://github.com/creditbit-project/creditbit.git -b master-0.10
-    $ cd creditbit
-    $ ./autogen.sh
-    $ ./configure --disable-wallet --without-miniupnpc
-    $ make
-    $ strip src/creditbitd src/creditbit-cli src/creditbit-tx
-    $ cp -a src/creditbitd src/creditbit-cli src/creditbit-tx ~/bin
+    $ cd ~/src && git clone https://github.com/creditbit-project/creditbit.git
+    $ cd creditbit/src
+    $ make -f makefile.unix
+    $ strip creditbitd
+    $ cp -a creditbitd ~/bin
 
 ### Step 3. Configure and start creditbitd
 
@@ -133,7 +131,7 @@ If you already have a freshly indexed copy of the blockchain with txindex start 
 Allow some time to pass, so `creditbitd` connects to the network and starts
 downloading blocks. You can check its progress by running:
 
-    $ creditbit-cli getinfo
+    $ creditbitd getinfo
 
 Before starting the electrum server your creditbitd should have processed all
 blocks and caught up to the current height of the network (not just the headers).
@@ -146,9 +144,9 @@ find out the best way to do this.
 We will download the latest git snapshot for Electrum to configure and install it:
 
     $ cd ~
-    $ git clone https://github.com/pooler/electrum-creditbit-server.git
+    $ git clone https://github.com/creditbit/electrum-creditbit-server.git
     $ cd electrum-creditbit-server
-    $ sudo configure
+    $ sudo ./configure
     $ sudo python setup.py install
 
 See the INSTALL file for more information about the configure and install commands. 
@@ -186,7 +184,7 @@ The section in the electrum server configuration file (see step 10) looks like t
      [leveldb]
      path = /path/to/your/database
      # for each address, history will be pruned if it is longer than this limit
-     pruning_limit = 100
+     pruning_limit = 1000
 
 ### Step 7. Import blockchain into the database or download it
 
@@ -195,7 +193,7 @@ The "configure" script above will offer you to download a database with pruning 
 
 You can fetch recent copies of electrum leveldb databases with differnt pruning limits 
 and further instructions from the Electrum-CREDIT full archival server foundry at:
-http://foundry.electrum-creditbit.org/leveldb-dump/
+http://electrum1.creditbit.org/leveldb-dump/
 
 
 Alternatively, if you have the time and nerve, you can import the blockchain yourself.
