@@ -1,0 +1,37 @@
+[server]
+# username for running the daemon
+username = 
+# hostname. set it to a FQDN in order to be reached from outside
+host = 0.0.0.0
+# ports
+electrum_rpc_port = 8002
+stratum_tcp_port = 50001
+#stratum_tcp_ssl_port = 50002
+#report_host = 
+#report_stratum_tcp_port = 50001
+#report_stratum_tcp_ssl_port = 50002
+password = secret
+banner = Welcome to Electrum!
+banner_file = /etc/electrum-creditbit.banner
+irc = yes
+irc_nick = creditbit
+#ssl_certfile = /path/to/electrum-creditbit-server.crt
+#ssl_keyfile = /path/to/electrum-creditbit-server.key
+logfile = /var/log/electrum-creditbit.log
+donation_address = 
+
+# default backend is leveldb (pruning server)
+backend = leveldb
+
+[leveldb]
+# path to your database
+path = 
+# for each address, history will be pruned if it is longer than this limit
+pruning_limit = 1000
+
+[creditbitd]
+creditbitd_host = localhost
+creditbitd_port = 5555
+# user and password from creditbit.conf
+creditbitd_user = 
+creditbitd_password = 
