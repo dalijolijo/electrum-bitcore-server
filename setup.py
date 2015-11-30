@@ -24,9 +24,11 @@ setup(
     ],
     description="Creditbit Electrum Server",
     author="Thomas Voegtlin",
-    author_email="thomasv1@gmx.de",
+    author_email="thomasv1@gmx.deg",
+    maintainer="creditbit",
+    maintainer_email="support@creditbit.org",
     license="GNU Affero GPLv3",
-    url="https://github.com/pooler/electrum-creditbit-server/",
+    url="https://github.com/creditbit/electrum-creditbit-server/",
     long_description="""Server for the Electrum Lightweight Creditbit Wallet"""
 )
 
