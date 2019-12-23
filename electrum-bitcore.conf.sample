@@ -6,7 +6,7 @@ host = 0.0.0.0
 # ports
 electrum_rpc_port = 8002
 stratum_tcp_port = 50001
-#stratum_tcp_ssl_port = 50002
+stratum_tcp_ssl_port = 50002
 #report_host = 
 #report_stratum_tcp_port = 50001
 #report_stratum_tcp_ssl_port = 50002
@@ -31,7 +31,7 @@ pruning_limit = 1000
 
 [bitcored]
 bitcored_host = localhost
-bitcored_port = 5555
+bitcored_port = 8556 
 # user and password from creditbit.conf
 bitcored_user = 
 bitcored_password = 
