@@ -107,16 +107,16 @@ fi
 chown $user:$user $logfile
 
 
-creditbitd_user=$(read_config "creditbitd_user")
-if ! [ "$creditbitd_user" ]; then
+bitcored_user=$(read_config "bitcored_user")
+if ! [ "$bitcored_user" ]; then
     read -p "rpcuser (from your creditbit.conf file): " -r
-    write_config "creditbitd_user" $REPLY
+    write_config "bitcored_user" $REPLY
 fi
 
-creditbitd_password=$(read_config "creditbitd_password")
-if ! [ "$creditbitd_password" ]; then
+bitcored_password=$(read_config "bitcored_password")
+if ! [ "$bitcored_password" ]; then
     read -p "rpcpassword (from your creditbit.conf file): " -r
-    write_config "creditbitd_password" $REPLY
+    write_config "bitcored_password" $REPLY
 fi
 
 

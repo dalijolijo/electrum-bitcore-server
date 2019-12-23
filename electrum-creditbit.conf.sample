@@ -29,9 +29,9 @@ path =
 # for each address, history will be pruned if it is longer than this limit
 pruning_limit = 1000
 
-[creditbitd]
-creditbitd_host = localhost
-creditbitd_port = 5555
+[bitcored]
+bitcored_host = localhost
+bitcored_port = 5555
 # user and password from creditbit.conf
-creditbitd_user = 
-creditbitd_password = 
+bitcored_user = 
+bitcored_password = 

@@ -11,7 +11,7 @@ Features
     described by Alan Reiner (see the 'ultimate blockchain
     compression' thread in the Creditbittalk forum)
 
-  * The server requires creditbitd, leveldb and plyvel
+  * The server requires bitcored, leveldb and plyvel
 
   * The server code is open source. Anyone can run a server, removing
     single points of failure concerns.

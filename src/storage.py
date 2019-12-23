@@ -161,8 +161,8 @@ class Storage(object):
         return eval(s)
 
 
-    def write_undo_info(self, height, creditbitd_height, undo_info):
-        if height > creditbitd_height - 100 or self.test_reorgs:
+    def write_undo_info(self, height, bitcored_height, undo_info):
+        if height > bitcored_height - 100 or self.test_reorgs:
             self.db_undo.put("undo_info_%d" % (height % 100), repr(undo_info))
 
 

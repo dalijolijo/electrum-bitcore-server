@@ -54,9 +54,9 @@ Python libraries. Python 2.7 is the minimum supported version.
 
 **Hardware.** The lightest setup is a pruning server with diskspace 
 requirements of about 4 GB for the electrum database. However note that 
-you also need to run creditbitd and keep a copy of the full blockchain, 
+you also need to run bitcored and keep a copy of the full blockchain, 
 which is roughly 4 GB in July 2015. If you have less than 2 GB of RAM 
-make sure you limit creditbitd to 8 concurrent connections. If you have more 
+make sure you limit bitcored to 8 concurrent connections. If you have more 
 resources to spare you can run the server with a higher limit of historic
 transactions per address. CPU speed is important for the initial block
 chain import, but is also important if you plan to run a public Electrum server, 
@@ -67,10 +67,10 @@ has enough RAM to hold and process the leveldb database in tmpfs (e.g. /dev/shm)
 Instructions
 ------------
 
-### Step 1. Create a user for running creditbitd and Electrum server
+### Step 1. Create a user for running bitcored and Electrum server
 
 This step is optional, but for better security and resource separation I
-suggest you create a separate user just for running `creditbitd` and Electrum.
+suggest you create a separate user just for running `bitcored` and Electrum.
 We will also use the `~/bin` directory to keep locally installed files
 (others might want to use `/usr/local/bin` instead). We will download source
 code files to the `~/src` directory.
@@ -87,24 +87,24 @@ to your `.bashrc`, `.profile`, or `.bash_profile`, then logout and relogin:
     PATH="$HOME/bin:$PATH"
     $ exit
 
-### Step 2. Download creditbitd
+### Step 2. Download bitcored
 
-We currently recommend creditbitd 0.10.2.2 stable.
+We currently recommend bitcored 0.10.2.2 stable.
 
-If you prefer to compile creditbitd, here are some pointers for Ubuntu:
+If you prefer to compile bitcored, here are some pointers for Ubuntu:
 
     $ sudo apt-get install make g++ python-leveldb git build-essential libboost-all-dev libdb++-dev libminiupnpc-dev libcurl4-openssl-dev
     $ sudo su - creditbit
     $ cd ~/src && git clone https://github.com/creditbit-project/creditbit.git
     $ cd creditbit/src
     $ make -f makefile.unix
-    $ strip creditbitd
-    $ cp -a creditbitd ~/bin
+    $ strip bitcored
+    $ cp -a bitcored ~/bin
 
-### Step 3. Configure and start creditbitd
+### Step 3. Configure and start bitcored
 
-In order to allow Electrum to "talk" to `creditbitd`, we need to set up an RPC
-username and password for `creditbitd`. We will then start `creditbitd` and
+In order to allow Electrum to "talk" to `bitcored`, we need to set up an RPC
+username and password for `bitcored`. We will then start `bitcored` and
 wait for it to complete downloading the blockchain.
 
     $ mkdir ~/.creditbit
@@ -119,23 +119,23 @@ Write this in `creditbit.conf`:
     disablewallet=1
 
 
-If you have an existing installation of creditbitd and have not previously
+If you have an existing installation of bitcored and have not previously
 set txindex=1 you need to reindex the blockchain by running
 
-    $ creditbitd -reindex
+    $ bitcored -reindex
 
-If you already have a freshly indexed copy of the blockchain with txindex start `creditbitd`:
+If you already have a freshly indexed copy of the blockchain with txindex start `bitcored`:
 
-    $ creditbitd
+    $ bitcored
 
-Allow some time to pass, so `creditbitd` connects to the network and starts
+Allow some time to pass, so `bitcored` connects to the network and starts
 downloading blocks. You can check its progress by running:
 
-    $ creditbitd getinfo
+    $ bitcored getinfo
 
-Before starting the electrum server your creditbitd should have processed all
+Before starting the electrum server your bitcored should have processed all
 blocks and caught up to the current height of the network (not just the headers).
-You should also set up your system to automatically start creditbitd at boot
+You should also set up your system to automatically start bitcored at boot
 time, running as the 'creditbit' user. Check your system documentation to
 find out the best way to do this.
 
@@ -262,7 +262,7 @@ in case you need to restore it.
 ### Step 9. Configure Electrum server
 
 Electrum reads a config file (/etc/electrum-creditbit.conf) when starting up. This
-file includes the database setup, creditbitd RPC setup, and a few other
+file includes the database setup, bitcored RPC setup, and a few other
 options.
 
 The "configure" script listed above will create a config file at /etc/electrum-creditbit.conf
@@ -301,9 +301,9 @@ Or if you use sudo and the user is added to sudoers group:
 
 Two more things for you to consider:
 
-1. To increase security you may want to close creditbitd for incoming connections and connect outbound only
+1. To increase security you may want to close bitcored for incoming connections and connect outbound only
 
-2. Consider restarting creditbitd (together with electrum-creditbit-server) on a weekly basis to clear out unconfirmed
+2. Consider restarting bitcored (together with electrum-creditbit-server) on a weekly basis to clear out unconfirmed
    transactions from the local the memory pool which did not propagate over the network.
 
 ### Step 11. (Finally!) Run Electrum server

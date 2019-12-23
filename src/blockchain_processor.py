@@ -55,11 +55,11 @@ class BlockchainProcessor(Processor):
 
         self.dblock = threading.Lock()
 
-        self.creditbitd_url = 'http://%s:%s@%s:%s/' % (
-            config.get('creditbitd', 'creditbitd_user'),
-            config.get('creditbitd', 'creditbitd_password'),
-            config.get('creditbitd', 'creditbitd_host'),
-            config.get('creditbitd', 'creditbitd_port'))
+        self.bitcored_url = 'http://%s:%s@%s:%s/' % (
+            config.get('bitcored', 'bitcored_user'),
+            config.get('bitcored', 'bitcored_password'),
+            config.get('bitcored', 'bitcored_host'),
+            config.get('bitcored', 'bitcored_port'))
 
         self.sent_height = 0
         self.sent_header = None
@@ -73,7 +73,7 @@ class BlockchainProcessor(Processor):
 
     def do_catch_up(self):
 
-        self.header = self.block2header(self.creditbitd('getblock', [self.storage.last_hash]))
+        self.header = self.block2header(self.bitcored('getblock', [self.storage.last_hash]))
         self.header['utxo_root'] = self.storage.get_root_hash().encode('hex')
         self.catch_up(sync=False)
         print_log("Blockchain is up to date.")
@@ -83,7 +83,7 @@ class BlockchainProcessor(Processor):
         while not self.shared.stopped():
             self.main_iteration()
             if self.shared.paused():
-                print_log("creditbitd is responding")
+                print_log("bitcored is responding")
                 self.shared.unpause()
             time.sleep(10)
 
@@ -104,14 +104,14 @@ class BlockchainProcessor(Processor):
         print_log(s)
 
 
-    def creditbitd(self, method, params=[]):
+    def bitcored(self, method, params=[]):
         postdata = dumps({"method": method, 'params': params, 'id': 'jsonrpc'})
         while True:
             try:
-                respdata = urllib.urlopen(self.creditbitd_url, postdata).read()
+                respdata = urllib.urlopen(self.bitcored_url, postdata).read()
                 break
             except:
-                print_log("cannot reach creditbitd...")
+                print_log("cannot reach bitcored...")
                 self.shared.pause()
                 time.sleep(10)
                 if self.shared.stopped():
@@ -137,8 +137,8 @@ class BlockchainProcessor(Processor):
         }
 
     def get_header(self, height):
-        block_hash = self.creditbitd('getblockhash', [height])
-        b = self.creditbitd('getblock', [block_hash])
+        block_hash = self.bitcored('getblockhash', [height])
+        b = self.bitcored('getblock', [block_hash])
         return self.block2header(b)
 
     def init_headers(self, db_height):
@@ -238,7 +238,7 @@ class BlockchainProcessor(Processor):
 
     def get_mempool_transaction(self, txid):
         try:
-            raw_tx = self.creditbitd('getrawtransaction', [txid, 0])
+            raw_tx = self.bitcored('getrawtransaction', [txid, 0])
         except:
             return None
 
@@ -299,8 +299,8 @@ class BlockchainProcessor(Processor):
 
     def get_merkle(self, tx_hash, height):
 
-        block_hash = self.creditbitd('getblockhash', [height])
-        b = self.creditbitd('getblock', [block_hash])
+        block_hash = self.bitcored('getblockhash', [height])
+        b = self.bitcored('getblock', [block_hash])
         tx_list = b.get('tx')
         tx_pos = tx_list.index(tx_hash)
 
@@ -403,7 +403,7 @@ class BlockchainProcessor(Processor):
 
         # add undo info
         if not revert:
-            self.storage.write_undo_info(block_height, self.creditbitd_height, undo_info)
+            self.storage.write_undo_info(block_height, self.bitcored_height, undo_info)
 
         # add the max
         self.storage.db_undo.put('height', repr( (block_hash, block_height, self.storage.db_version) ))
@@ -532,7 +532,7 @@ class BlockchainProcessor(Processor):
 
         elif method == 'blockchain.transaction.broadcast':
             try:
-                txo = self.creditbitd('sendrawtransaction', params)
+                txo = self.bitcored('sendrawtransaction', params)
                 print_log("sent tx:", txo)
                 result = txo
             except BaseException, e:
@@ -549,11 +549,11 @@ class BlockchainProcessor(Processor):
 
         elif method == 'blockchain.transaction.get':
             tx_hash = params[0]
-            result = self.creditbitd('getrawtransaction', [tx_hash, 0])
+            result = self.bitcored('getrawtransaction', [tx_hash, 0])
 
         elif method == 'blockchain.estimatefee':
             num = int(params[0])
-            result = self.creditbitd('estimatefee', [num])
+            result = self.bitcored('estimatefee', [num])
 
         else:
             raise BaseException("unknown method:%s" % method)
@@ -565,7 +565,7 @@ class BlockchainProcessor(Processor):
 
 
     def getfullblock(self, block_hash):
-        block = self.creditbitd('getblock', [block_hash])
+        block = self.bitcored('getblock', [block_hash])
 
         rawtxreq = []
         i = 0
@@ -579,9 +579,9 @@ class BlockchainProcessor(Processor):
 
         postdata = dumps(rawtxreq)
         try:
-            respdata = urllib.urlopen(self.creditbitd_url, postdata).read()
+            respdata = urllib.urlopen(self.bitcored_url, postdata).read()
         except:
-            logger.error("creditbitd error (getfullblock)",exc_info=True)
+            logger.error("bitcored error (getfullblock)",exc_info=True)
             self.shared.stop()
 
         r = loads(respdata)
@@ -589,7 +589,7 @@ class BlockchainProcessor(Processor):
         for ir in r:
             if ir['error'] is not None:
                 self.shared.stop()
-                print_log("Error: make sure you run creditbitd with txindex=1; use -reindex if needed.")
+                print_log("Error: make sure you run bitcored with txindex=1; use -reindex if needed.")
                 raise BaseException(ir['error'])
             rawtxdata.append(ir['result'])
         block['tx'] = rawtxdata
@@ -603,10 +603,10 @@ class BlockchainProcessor(Processor):
             self.mtime('')
 
             # are we done yet?
-            info = self.creditbitd('getinfo')
-            self.creditbitd_height = info.get('blocks')
-            creditbitd_block_hash = self.creditbitd('getblockhash', [self.creditbitd_height])
-            if self.storage.last_hash == creditbitd_block_hash:
+            info = self.bitcored('getinfo')
+            self.bitcored_height = info.get('blocks')
+            bitcored_block_hash = self.bitcored('getblockhash', [self.bitcored_height])
+            if self.storage.last_hash == bitcored_block_hash:
                 self.up_to_date = True
                 break
 
@@ -616,7 +616,7 @@ class BlockchainProcessor(Processor):
             # not done..
             self.up_to_date = False
             try:
-                next_block_hash = self.creditbitd('getblockhash', [self.storage.height + 1])
+                next_block_hash = self.bitcored('getblockhash', [self.storage.height + 1])
                 next_block = self.getfullblock(next_block_hash)
             except BaseException, e:
                 revert = True
@@ -661,7 +661,7 @@ class BlockchainProcessor(Processor):
                     prev_root_hash = None
 
 
-        self.header = self.block2header(self.creditbitd('getblock', [self.storage.last_hash]))
+        self.header = self.block2header(self.bitcored('getblock', [self.storage.last_hash]))
         self.header['utxo_root'] = self.storage.get_root_hash().encode('hex')
 
         if self.shared.stopped(): 
@@ -670,7 +670,7 @@ class BlockchainProcessor(Processor):
 
 
     def memorypool_update(self):
-        mempool_hashes = set(self.creditbitd('getrawmempool'))
+        mempool_hashes = set(self.bitcored('getrawmempool'))
         touched_addresses = set([])
 
         # get new transactions
