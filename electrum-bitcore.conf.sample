@@ -11,13 +11,13 @@ stratum_tcp_ssl_port = 50002
 #report_stratum_tcp_port = 50001
 #report_stratum_tcp_ssl_port = 50002
 password = secret
-banner = Welcome to Electrum!
-banner_file = /etc/electrum-creditbit.banner
+banner = Welcome to Electrum for Bitcore!
+banner_file = /etc/electrum-bitcore.banner
 irc = yes
-irc_nick = creditbit
-#ssl_certfile = /path/to/electrum-creditbit-server.crt
-#ssl_keyfile = /path/to/electrum-creditbit-server.key
-logfile = /var/log/electrum-creditbit.log
+irc_nick = bitcore
+#ssl_certfile = /path/to/electrum-bitcore-server.crt
+#ssl_keyfile = /path/to/electrum-bitcore-server.key
+logfile = /var/log/electrum-bitcore.log
 donation_address = 
 
 # default backend is leveldb (pruning server)
@@ -32,6 +32,6 @@ pruning_limit = 1000
 [bitcored]
 bitcored_host = localhost
 bitcored_port = 8556 
-# user and password from creditbit.conf
+# user and password from bitcore.conf
 bitcored_user = 
 bitcored_password = 

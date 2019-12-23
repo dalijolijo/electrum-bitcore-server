@@ -66,7 +66,7 @@ class Storage(object):
         print_log("UTXO tree root hash:", self.root_hash.encode('hex'))
         print_log("Coins in database:", v)
 
-    # convert between creditbit addresses and 20 bytes keys used for storage. 
+    # convert between bitcore addresses and 20 bytes keys used for storage. 
     def address_to_key(self, addr):
         return bc_address_to_hash_160(addr)
 
@@ -105,7 +105,7 @@ class Storage(object):
     def listunspent(self, addr):
         key = self.address_to_key(addr)
         if key is None:
-            raise BaseException('Invalid Creditbit address', addr)
+            raise BaseException('Invalid Bitcore address', addr)
 
         out = []
         for k, v in self.db_utxo.iterator(start=key):

@@ -12,7 +12,7 @@ requirements.
 
 The most up-to date version of this document is available at:
 
-    https://github.com/creditbit/electrum-creditbit-server/blob/master/HOWTO.md
+    https://github.com/bitcore/electrum-bitcore-server/blob/master/HOWTO.md
 
 Conventions
 -----------
@@ -20,8 +20,8 @@ Conventions
 In this document, lines starting with a hash sign (#) or a dollar sign ($)
 contain commands. Commands starting with a hash should be run as root,
 commands starting with a dollar should be run as a normal user (in this
-document, we assume that user is called 'creditbit'). We also assume the
-creditbit user has sudo rights, so we use '$ sudo command' when we need to.
+document, we assume that user is called 'bitcore'). We also assume the
+bitcore user has sudo rights, so we use '$ sudo command' when we need to.
 
 Strings that are surrounded by "lower than" and "greater than" ( < and > )
 should be replaced by the user with something appropriate. For example,
@@ -75,13 +75,13 @@ We will also use the `~/bin` directory to keep locally installed files
 (others might want to use `/usr/local/bin` instead). We will download source
 code files to the `~/src` directory.
 
-    $ sudo adduser creditbit --disabled-password
+    $ sudo adduser bitcore --disabled-password
     $ sudo apt-get install git
-    $ sudo su - creditbit
+    $ sudo su - bitcore
     $ mkdir ~/bin ~/src
     $ echo $PATH
 
-If you don't see `/home/creditbit/bin` in the output, you should add this line
+If you don't see `/home/bitcore/bin` in the output, you should add this line
 to your `.bashrc`, `.profile`, or `.bash_profile`, then logout and relogin:
 
     PATH="$HOME/bin:$PATH"
@@ -94,9 +94,9 @@ We currently recommend bitcored 0.10.2.2 stable.
 If you prefer to compile bitcored, here are some pointers for Ubuntu:
 
     $ sudo apt-get install make g++ python-leveldb git build-essential libboost-all-dev libdb++-dev libminiupnpc-dev libcurl4-openssl-dev
-    $ sudo su - creditbit
-    $ cd ~/src && git clone https://github.com/creditbit-project/creditbit.git
-    $ cd creditbit/src
+    $ sudo su - bitcore
+    $ cd ~/src && git clone https://github.com/bitcore-project/bitcore.git
+    $ cd bitcore/src
     $ make -f makefile.unix
     $ strip bitcored
     $ cp -a bitcored ~/bin
@@ -107,10 +107,10 @@ In order to allow Electrum to "talk" to `bitcored`, we need to set up an RPC
 username and password for `bitcored`. We will then start `bitcored` and
 wait for it to complete downloading the blockchain.
 
-    $ mkdir ~/.creditbit
-    $ $EDITOR ~/.creditbit/creditbit.conf
+    $ mkdir ~/.bitcore
+    $ $EDITOR ~/.bitcore/bitcore.conf
 
-Write this in `creditbit.conf`:
+Write this in `bitcore.conf`:
 
     rpcuser=<rpc-username>
     rpcpassword=<rpc-password>
@@ -136,7 +136,7 @@ downloading blocks. You can check its progress by running:
 Before starting the electrum server your bitcored should have processed all
 blocks and caught up to the current height of the network (not just the headers).
 You should also set up your system to automatically start bitcored at boot
-time, running as the 'creditbit' user. Check your system documentation to
+time, running as the 'bitcore' user. Check your system documentation to
 find out the best way to do this.
 
 ### Step 4. Download and install Electrum Server
@@ -144,8 +144,8 @@ find out the best way to do this.
 We will download the latest git snapshot for Electrum to configure and install it:
 
     $ cd ~
-    $ git clone https://github.com/creditbit/electrum-creditbit-server.git
-    $ cd electrum-creditbit-server
+    $ git clone https://github.com/bitcore/electrum-bitcore-server.git
+    $ cd electrum-bitcore-server
     $ sudo ./configure
     $ sudo python setup.py install
 
@@ -193,7 +193,7 @@ The "configure" script above will offer you to download a database with pruning 
 
 You can fetch recent copies of electrum leveldb databases with differnt pruning limits 
 and further instructions from the Electrum-CREDIT full archival server foundry at:
-http://electrum1.creditbit.org/leveldb-dump/
+http://electrum1.bitcore.cc/leveldb-dump/
 
 
 Alternatively, if you have the time and nerve, you can import the blockchain yourself.
@@ -261,11 +261,11 @@ in case you need to restore it.
 
 ### Step 9. Configure Electrum server
 
-Electrum reads a config file (/etc/electrum-creditbit.conf) when starting up. This
+Electrum reads a config file (/etc/electrum-bitcore.conf) when starting up. This
 file includes the database setup, bitcored RPC setup, and a few other
 options.
 
-The "configure" script listed above will create a config file at /etc/electrum-creditbit.conf
+The "configure" script listed above will create a config file at /etc/electrum-bitcore.conf
 which you can edit to modify the settings.
 
 Go through the config options and set them to your liking.
@@ -277,12 +277,12 @@ Electrum server currently needs quite a few file handles to use leveldb. It also
 file handles for each connection made to the server. It's good practice to increase the
 open files limit to 64k. 
 
-The "configure" script will take care of this and ask you to create a user for running electrum-creditbit-server.
-If you're using user creditbit to run electrum and have added it manually like shown in this HOWTO run 
+The "configure" script will take care of this and ask you to create a user for running electrum-bitcore-server.
+If you're using user bitcore to run electrum and have added it manually like shown in this HOWTO run 
 the following code to add the limits to your /etc/security/limits.conf:
 
-     echo "creditbit hard nofile 65536" >> /etc/security/limits.conf
-     echo "creditbit soft nofile 65536" >> /etc/security/limits.conf
+     echo "bitcore hard nofile 65536" >> /etc/security/limits.conf
+     echo "bitcore soft nofile 65536" >> /etc/security/limits.conf
 
 If you are on Debian > 8.0 Jessie or other distribution based on it, you also need to add these lines in /etc/pam.d/common-session and /etc/pam.d/common-session-noninteractive otherwise the limits in /etc/security/limits.conf will not work:
 
@@ -291,28 +291,28 @@ If you are on Debian > 8.0 Jessie or other distribution based on it, you also ne
     
 Check if the limits are changed either by logging with the user configured to run Electrum server as. Example:
 
-    su - creditbit
+    su - bitcore
     ulimit -n
 
 Or if you use sudo and the user is added to sudoers group:
 
-    sudo -u creditbit -i ulimit -n
+    sudo -u bitcore -i ulimit -n
 
 
 Two more things for you to consider:
 
 1. To increase security you may want to close bitcored for incoming connections and connect outbound only
 
-2. Consider restarting bitcored (together with electrum-creditbit-server) on a weekly basis to clear out unconfirmed
+2. Consider restarting bitcored (together with electrum-bitcore-server) on a weekly basis to clear out unconfirmed
    transactions from the local the memory pool which did not propagate over the network.
 
 ### Step 11. (Finally!) Run Electrum server
 
 The magic moment has come: you can now start your Electrum server as root (it will su to your unprivileged user):
 
-    # electrum-creditbit-server start
+    # electrum-bitcore-server start
 
-Note: If you want to run the server without installing it on your system, just run 'run_electrum_creditbit_server" as the
+Note: If you want to run the server without installing it on your system, just run 'run_electrum_bitcore_server" as the
 unprivileged user.
 
 You should see this in the log file:
@@ -321,15 +321,15 @@ You should see this in the log file:
 
 If you want to stop Electrum server, use the 'stop' command:
 
-    # electrum-creditbit-server stop
+    # electrum-bitcore-server stop
 
 
-If your system supports it, you may add electrum-creditbit-server to the /etc/init.d directory. 
+If your system supports it, you may add electrum-bitcore-server to the /etc/init.d directory. 
 This will ensure that the server is started and stopped automatically, and that the database is closed 
 safely whenever your machine is rebooted.
 
-    # ln -s `which electrum-creditbit-server` /etc/init.d/electrum-creditbit-server
-    # update-rc.d electrum-creditbit-server defaults
+    # ln -s `which electrum-bitcore-server` /etc/init.d/electrum-bitcore-server
+    # update-rc.d electrum-bitcore-server defaults
 
 ### Step 12. Test the Electrum server
 
@@ -342,16 +342,16 @@ or hostname and the port. Press 'Ok' and the client will disconnect from the
 current server and connect to your new Electrum server. You should see your
 addresses and transactions history. You can see the number of blocks and
 response time in the Server selection window. You should send/receive some
-creditbits to confirm that everything is working properly.
+bitcores to confirm that everything is working properly.
 
 ### Step 13. Join us on IRC, subscribe to the server thread
 
 Say hi to the dev crew, other server operators, and fans on
-irc.freenode.net #electrum-creditbit and we'll try to congratulate you
+irc.freenode.net #electrum-bitcore and we'll try to congratulate you
 on supporting the community by running an Electrum-CREDIT node.
 
 If you're operating a public Electrum-CREDIT server please subscribe
 to the following mailing list:
-https://groups.google.com/forum/#!forum/electrum-creditbit-server
+https://groups.google.com/forum/#!forum/electrum-bitcore-server
 It'll contain announcements about important updates to Electrum-CREDIT
 server required for a smooth user experience.

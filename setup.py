@@ -1,35 +1,35 @@
 from setuptools import setup
 
 setup(
-    name="electrum-creditbit-server",
+    name="electrum-bitcore-server",
     version="1.0",
-    scripts=['run_electrum_creditbit_server.py','electrum-creditbit-server'],
+    scripts=['run_electrum_bitcore_server.py','electrum-bitcore-server'],
     install_requires=['plyvel','jsonrpclib', 'irc>=11'],
     package_dir={
-        'electrumcreditbitserver':'src'
+        'electrumbitcoreserver':'src'
         },
     py_modules=[
-        'electrumcreditbitserver.__init__',
-        'electrumcreditbitserver.utils',
-        'electrumcreditbitserver.storage',
-        'electrumcreditbitserver.deserialize',
-        'electrumcreditbitserver.networks',
-        'electrumcreditbitserver.blockchain_processor',
-        'electrumcreditbitserver.server_processor',
-        'electrumcreditbitserver.processor',
-        'electrumcreditbitserver.version',
-        'electrumcreditbitserver.ircthread',
-        'electrumcreditbitserver.stratum_tcp',
-        'electrumcreditbitserver.stratum_http'
+        'electrumbitcoreserver.__init__',
+        'electrumbitcoreserver.utils',
+        'electrumbitcoreserver.storage',
+        'electrumbitcoreserver.deserialize',
+        'electrumbitcoreserver.networks',
+        'electrumbitcoreserver.blockchain_processor',
+        'electrumbitcoreserver.server_processor',
+        'electrumbitcoreserver.processor',
+        'electrumbitcoreserver.version',
+        'electrumbitcoreserver.ircthread',
+        'electrumbitcoreserver.stratum_tcp',
+        'electrumbitcoreserver.stratum_http'
     ],
-    description="Creditbit Electrum Server",
+    description="Bitcore Electrum Server",
     author="Thomas Voegtlin",
     author_email="thomasv1@gmx.deg",
-    maintainer="creditbit",
-    maintainer_email="support@creditbit.org",
+    maintainer="bitcore",
+    maintainer_email="support@bitcore.cc",
     license="GNU Affero GPLv3",
-    url="https://github.com/creditbit/electrum-creditbit-server/",
-    long_description="""Server for the Electrum Lightweight Creditbit Wallet"""
+    url="https://github.com/bitcore/electrum-bitcore-server/",
+    long_description="""Server for the Electrum Lightweight Bitcore Wallet"""
 )
 
 
