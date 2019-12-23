@@ -32,7 +32,7 @@ Lines that lack hash or dollar signs are pastes from config files. They
 should be copied verbatim or adapted without the indentation tab.
 
 apt-get install commands are suggestions for required dependencies.
-They conform to an Ubuntu 13.10 system but may well work with Debian
+They conform to an Ubuntu 16.04 system but may well work with Debian
 or earlier and later versions of Ubuntu.
 
 Prerequisites
@@ -162,7 +162,7 @@ installed by caling "python setup.py install" above. They can be also be install
 package manager if you don't want to use the install routine
 
     $ sudo apt-get install python-setuptools python-openssl python-leveldb libleveldb-dev 
-    $ sudo easy_install jsonrpclib irc plyvel
+    $ sudo easy_install jsonrpclib irc==12.1.1 plyvel
 
 Regarding leveldb see the steps in README.leveldb for further details, especially if your system
 doesn't have the python-leveldb package or if plyvel installation fails.

@@ -4,7 +4,7 @@ setup(
     name="electrum-bitcore-server",
     version="1.0",
     scripts=['run_electrum_bitcore_server.py','electrum-bitcore-server'],
-    install_requires=['plyvel','jsonrpclib', 'irc>=11'],
+    install_requires=['plyvel','jsonrpclib', 'irc>=12.1.1'],
     package_dir={
         'electrumbitcoreserver':'src'
         },
@@ -28,7 +28,7 @@ setup(
     maintainer="bitcore",
     maintainer_email="support@bitcore.cc",
     license="GNU Affero GPLv3",
-    url="https://github.com/bitcore/electrum-bitcore-server/",
+    url="https://github.com/dalijolijo/electrum-bitcore-server/",
     long_description="""Server for the Electrum Lightweight Bitcore Wallet"""
 )
 
