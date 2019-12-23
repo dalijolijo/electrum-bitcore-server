@@ -52,7 +52,6 @@ def var_int(i):
 
 
 Hash = lambda x: hashlib.sha256(hashlib.sha256(x).digest()).digest()
-HashX11 = lambda x: x11_hash.getPoWHash(x)
 
 
 hash_encode = lambda x: x[::-1].encode('hex')
