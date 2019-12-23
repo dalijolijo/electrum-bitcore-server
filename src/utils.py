@@ -20,7 +20,6 @@ import threading
 import time
 import hashlib
 import sys
-import x11_hash
 
 __b58chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 __b58base = len(__b58chars)
