@@ -1,5 +1,5 @@
-How to run your own Electrum server
-===================================
+How to run your own Bitcore Electrum Server
+===========================================
 
 Abstract
 --------
@@ -12,7 +12,7 @@ requirements.
 
 The most up-to date version of this document is available at:
 
-    https://github.com/bitcore/electrum-bitcore-server/blob/master/HOWTO.md
+   https://github.com/dalijolijo/electrum-bitcore-server/blob/master/HOWTO.md 
 
 Conventions
 -----------
@@ -89,17 +89,21 @@ to your `.bashrc`, `.profile`, or `.bash_profile`, then logout and relogin:
 
 ### Step 2. Download bitcored
 
-We currently recommend bitcored 0.10.2.2 stable.
+We currently recommend bitcored 0.15.2.2 stable.
 
 If you prefer to compile bitcored, here are some pointers for Ubuntu:
 
-    $ sudo apt-get install make g++ python-leveldb git build-essential libboost-all-dev libdb++-dev libminiupnpc-dev libcurl4-openssl-dev
+    $ sudo apt-get install autoconf make bsdmainutils g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config libevent-dev
     $ sudo su - bitcore
-    $ cd ~/src && git clone https://github.com/bitcore-project/bitcore.git
-    $ cd bitcore/src
-    $ make -f makefile.unix
-    $ strip bitcored
-    $ cp -a bitcored ~/bin
+    $ cd ~/src && wget https://github.com/LIMXTEC/BitCore/archive/0.15.2.2.tar.gz
+    $ tar xzf 0.15.2.2.tar.gz
+    $ sha256sum 0.15.2.2.tar.gz | grep 5d843ba542e71f03a77cac7245d0dd905fcb0be898df321c24fc4739cdeb37ae
+    $ cd BitCore-0.15.2.2
+    $ ./autogen.sh
+    $ ./configure --disable-wallet --without-miniupnpc --disable-tests --disable-bench
+    $ make
+    $ strip src/bitcored src/bitcore-cli src/bitcore-tx
+    $ cp -a src/bitcored src/bitcore-cli src/bitcore-tx ~/bin
 
 ### Step 3. Configure and start bitcored
 
@@ -108,7 +112,7 @@ username and password for `bitcored`. We will then start `bitcored` and
 wait for it to complete downloading the blockchain.
 
     $ mkdir ~/.bitcore
-    $ $EDITOR ~/.bitcore/bitcore.conf
+    $ vi ~/.bitcore/bitcore.conf
 
 Write this in `bitcore.conf`:
 
@@ -144,10 +148,10 @@ find out the best way to do this.
 We will download the latest git snapshot for Electrum to configure and install it:
 
     $ cd ~
-    $ git clone https://github.com/bitcore/electrum-bitcore-server.git
+    $ git clone https://github.com/dalijolijo/electrum-bitcore-server.git
     $ cd electrum-bitcore-server
     $ sudo ./configure
-    $ sudo python setup.py install
+    $ sudo python setup.py install #if setup not successful, check dependencies in Step5
 
 See the INSTALL file for more information about the configure and install commands. 
 
@@ -281,22 +285,22 @@ The "configure" script will take care of this and ask you to create a user for r
 If you're using user bitcore to run electrum and have added it manually like shown in this HOWTO run 
 the following code to add the limits to your /etc/security/limits.conf:
 
-     echo "bitcore hard nofile 65536" >> /etc/security/limits.conf
-     echo "bitcore soft nofile 65536" >> /etc/security/limits.conf
+     $ echo "bitcore hard nofile 65536" >> /etc/security/limits.conf
+     $ echo "bitcore soft nofile 65536" >> /etc/security/limits.conf
 
 If you are on Debian > 8.0 Jessie or other distribution based on it, you also need to add these lines in /etc/pam.d/common-session and /etc/pam.d/common-session-noninteractive otherwise the limits in /etc/security/limits.conf will not work:
 
-    echo "session required pam_limits.so" >> /etc/pam.d/common-session
-    echo "session required pam_limits.so" >> /etc/pam.d/common-session-noninteractive
+    $ echo "session required pam_limits.so" >> /etc/pam.d/common-session
+    $ echo "session required pam_limits.so" >> /etc/pam.d/common-session-noninteractive
     
 Check if the limits are changed either by logging with the user configured to run Electrum server as. Example:
 
-    su - bitcore
-    ulimit -n
+    $ su - bitcore
+    $ ulimit -n
 
 Or if you use sudo and the user is added to sudoers group:
 
-    sudo -u bitcore -i ulimit -n
+    $ sudo -u bitcore -i ulimit -n
 
 
 Two more things for you to consider:
@@ -310,7 +314,7 @@ Two more things for you to consider:
 
 The magic moment has come: you can now start your Electrum server as root (it will su to your unprivileged user):
 
-    # electrum-bitcore-server start
+    $ electrum-bitcore-server start
 
 Note: If you want to run the server without installing it on your system, just run 'run_electrum_bitcore_server" as the
 unprivileged user.
@@ -321,15 +325,15 @@ You should see this in the log file:
 
 If you want to stop Electrum server, use the 'stop' command:
 
-    # electrum-bitcore-server stop
+    $ electrum-bitcore-server stop
 
 
 If your system supports it, you may add electrum-bitcore-server to the /etc/init.d directory. 
 This will ensure that the server is started and stopped automatically, and that the database is closed 
 safely whenever your machine is rebooted.
 
-    # ln -s `which electrum-bitcore-server` /etc/init.d/electrum-bitcore-server
-    # update-rc.d electrum-bitcore-server defaults
+    $ ln -s `which electrum-bitcore-server` /etc/init.d/electrum-bitcore-server
+    $ update-rc.d electrum-bitcore-server defaults
 
 ### Step 12. Test the Electrum server
 
