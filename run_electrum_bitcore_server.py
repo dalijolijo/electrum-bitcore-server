@@ -24,6 +24,7 @@ import time
 import threading
 import json
 import os
+import importlib.util
 
 if os.path.dirname(os.path.realpath(__file__)) == os.getcwd():
     name = 'electrumserver'
