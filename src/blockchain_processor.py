@@ -2,19 +2,19 @@ import ast
 import hashlib
 from json import dumps, loads
 import os
-from Queue import Queue
+from queue import Queue
 import random
 import sys
 import time
 import threading
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from calendar import timegm
 from time import strptime
-import deserialize
-from processor import Processor, print_log
-from utils import *
-from storage import Storage
-from utils import logger
+from . import deserialize
+from .processor import Processor, print_log
+from .utils import *
+from .storage import Storage
+from .utils import logger
 
 
 class BlockchainProcessor(Processor):
@@ -99,7 +99,7 @@ class BlockchainProcessor(Processor):
 
     def print_mtime(self):
         s = ''
-        for k, v in self.mtimes.items():
+        for k, v in list(self.mtimes.items()):
             s += k+':'+"%.2f"%v+' '
         print_log(s)
 
@@ -108,7 +108,7 @@ class BlockchainProcessor(Processor):
         postdata = dumps({"method": method, 'params': params, 'id': 'jsonrpc'})
         while True:
             try:
-                respdata = urllib.urlopen(self.bitcored_url, postdata).read()
+                respdata = urllib.request.urlopen(self.bitcored_url, postdata).read()
                 break
             except:
                 print_log("cannot reach bitcored...")
@@ -304,7 +304,7 @@ class BlockchainProcessor(Processor):
         tx_list = b.get('tx')
         tx_pos = tx_list.index(tx_hash)
 
-        merkle = map(hash_decode, tx_list)
+        merkle = list(map(hash_decode, tx_list))
         target_hash = hash_decode(tx_hash)
         s = []
         while len(merkle) != 1:
@@ -535,7 +535,7 @@ class BlockchainProcessor(Processor):
                 txo = self.bitcored('sendrawtransaction', params)
                 print_log("sent tx:", txo)
                 result = txo
-            except BaseException, e:
+            except BaseException as e:
                 result = str(e)  # do not send an error
                 print_log("error:", result, params)
 
@@ -579,7 +579,7 @@ class BlockchainProcessor(Processor):
 
         postdata = dumps(rawtxreq)
         try:
-            respdata = urllib.urlopen(self.bitcored_url, postdata).read()
+            respdata = urllib.request.urlopen(self.bitcored_url, postdata).read()
         except:
             logger.error("bitcored error (getfullblock)",exc_info=True)
             self.shared.stop()
@@ -618,7 +618,7 @@ class BlockchainProcessor(Processor):
             try:
                 next_block_hash = self.bitcored('getblockhash', [self.storage.height + 1])
                 next_block = self.getfullblock(next_block_hash)
-            except BaseException, e:
+            except BaseException as e:
                 revert = True
                 next_block = self.getfullblock(self.storage.last_hash)
 
@@ -691,7 +691,7 @@ class BlockchainProcessor(Processor):
 
 
         # check all tx outputs
-        for tx_hash, tx in new_tx.items():
+        for tx_hash, tx in list(new_tx.items()):
             mpa = self.mempool_addresses.get(tx_hash, {})
             out_values = []
             for x in tx.get('outputs'):
@@ -709,7 +709,7 @@ class BlockchainProcessor(Processor):
             self.mempool_values[tx_hash] = out_values
 
         # check all inputs
-        for tx_hash, tx in new_tx.items():
+        for tx_hash, tx in list(new_tx.items()):
             mpa = self.mempool_addresses.get(tx_hash, {})
             for x in tx.get('inputs'):
                 # we assume that the input address can be parsed by deserialize(); this is true for Electrum transactions
@@ -737,7 +737,7 @@ class BlockchainProcessor(Processor):
 
 
         # remove deprecated entries from mempool_addresses
-        for tx_hash, addresses in self.mempool_addresses.items():
+        for tx_hash, addresses in list(self.mempool_addresses.items()):
             if tx_hash not in self.mempool_hashes:
                 self.mempool_addresses.pop(tx_hash)
                 self.mempool_values.pop(tx_hash)
@@ -746,8 +746,8 @@ class BlockchainProcessor(Processor):
 
         # rebuild mempool histories
         new_mempool_hist = {}
-        for tx_hash, addresses in self.mempool_addresses.items():
-            for addr, delta in addresses.items():
+        for tx_hash, addresses in list(self.mempool_addresses.items()):
+            for addr, delta in list(addresses.items()):
                 h = new_mempool_hist.get(addr, [])
                 if tx_hash not in h:
                     h.append((tx_hash, delta))

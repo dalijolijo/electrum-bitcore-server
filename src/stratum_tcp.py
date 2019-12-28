@@ -1,13 +1,13 @@
 import json
-import Queue as queue
+import queue as queue
 import socket
 import select
 import threading
 import time
 import sys
 
-from processor import Session, Dispatcher
-from utils import print_log, logger
+from .processor import Session, Dispatcher
+from .utils import print_log, logger
 
 
 READ_ONLY = select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR
@@ -206,7 +206,7 @@ class TcpServer(threading.Thread):
         while not self.shared.stopped():
 
             if self.shared.paused():
-                sessions = self.fd_to_session.keys()
+                sessions = list(self.fd_to_session.keys())
                 if sessions:
                     logger.info("closing %d sessions"%len(sessions))
                 for fd in sessions:

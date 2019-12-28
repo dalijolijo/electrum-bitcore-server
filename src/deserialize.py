@@ -7,7 +7,7 @@ import string
 import struct
 import types
 
-from utils import hash_160_to_pubkey_address, hash_160_to_script_address, public_key_to_pubkey_address, hash_encode,\
+from .utils import hash_160_to_pubkey_address, hash_160_to_script_address, public_key_to_pubkey_address, hash_encode,\
     hash_160
 
 
@@ -170,11 +170,11 @@ class Enumeration:
         uniqueNames = []
         uniqueValues = []
         for x in enumList:
-            if isinstance(x, types.TupleType):
+            if isinstance(x, tuple):
                 x, i = x
-            if not isinstance(x, types.StringType):
+            if not isinstance(x, bytes):
                 raise EnumException("enum name is not a string: %r" % x)
-            if not isinstance(i, types.IntType):
+            if not isinstance(i, int):
                 raise EnumException("enum value is not an integer: %r" % i)
             if x in uniqueNames:
                 raise EnumException("enum name is not unique: %r" % x)
@@ -247,13 +247,13 @@ def parse_Transaction(vds, is_coinbase):
     d['time'] = vds.read_int32()
     n_vin = vds.read_compact_size()
     d['inputs'] = []
-    for i in xrange(n_vin):
+    for i in range(n_vin):
             o = parse_TxIn(vds)
             if not is_coinbase:
                     d['inputs'].append(o)
     n_vout = vds.read_compact_size()
     d['outputs'] = []
-    for i in xrange(n_vout):
+    for i in range(n_vout):
             o = parse_TxOut(vds, i)
 
             #if o['address'] == "None" and o['value']==0:
@@ -371,7 +371,7 @@ def get_address_from_input_script(bytes):
 
         redeemScript = decoded[-1][1]
         num = len(match) - 2
-        signatures = map(lambda x:x[1].encode('hex'), decoded[1:-1])
+        signatures = [x[1].encode('hex') for x in decoded[1:-1]]
         dec2 = [ x for x in script_GetOp(redeemScript) ]
 
         # 2 of 2

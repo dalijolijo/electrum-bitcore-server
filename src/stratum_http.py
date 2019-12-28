@@ -26,10 +26,10 @@ from the processor point of view:
 import json
 import logging
 import os
-import Queue
-import SimpleXMLRPCServer
+import queue
+import xmlrpc.server
 import socket
-import SocketServer
+import socketserver
 import sys
 import time
 import threading
@@ -47,21 +47,21 @@ except ImportError:
     fcntl = None
 
 
-from processor import Session
-from utils import random_string, print_log
+from .processor import Session
+from .utils import random_string, print_log
 
 
 def get_version(request):
     # must be a dict
-    if 'jsonrpc' in request.keys():
+    if 'jsonrpc' in list(request.keys()):
         return 2.0
-    if 'id' in request.keys():
+    if 'id' in list(request.keys()):
         return 1.0
     return None
 
 
 def validate_request(request):
-    if not isinstance(request, types.DictType):
+    if not isinstance(request, dict):
         return Fault(-32600, 'Request must be {}, not %s.' % type(request))
     rpcid = request.get('id', None)
     version = get_version(request)
@@ -70,23 +70,23 @@ def validate_request(request):
     request.setdefault('params', [])
     method = request.get('method', None)
     params = request.get('params')
-    param_types = (types.ListType, types.DictType, types.TupleType)
-    if not method or type(method) not in types.StringTypes or type(params) not in param_types:
+    param_types = (list, dict, tuple)
+    if not method or type(method) not in (str,) or type(params) not in param_types:
         return Fault(-32600, 'Invalid request parameters or method.', rpcid=rpcid)
     return True
 
 
-class StratumJSONRPCDispatcher(SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
+class StratumJSONRPCDispatcher(xmlrpc.server.SimpleXMLRPCDispatcher):
 
     def __init__(self, encoding=None):
         # todo: use super
-        SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self, allow_none=True, encoding=encoding)
+        xmlrpc.server.SimpleXMLRPCDispatcher.__init__(self, allow_none=True, encoding=encoding)
 
     def _marshaled_dispatch(self, session_id, data, dispatch_method=None):
         response = None
         try:
             request = jsonrpclib.loads(data)
-        except Exception, e:
+        except Exception as e:
             fault = Fault(-32700, 'Request %s invalid. (%s)' % (data, e))
             response = fault.response()
             return response
@@ -97,7 +97,7 @@ class StratumJSONRPCDispatcher(SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
         session.time = time.time()
 
         responses = []
-        if not isinstance(request, types.ListType):
+        if not isinstance(request, list):
             request = [request]
 
         for req_entry in request:
@@ -139,7 +139,7 @@ class StratumJSONRPCDispatcher(SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
         return responses
 
 
-class StratumJSONRPCRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
+class StratumJSONRPCRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
 
     def do_OPTIONS(self):
         self.send_response(200)
@@ -168,13 +168,13 @@ class StratumJSONRPCRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler
             data = json.dumps([])
             response = self.server._marshaled_dispatch(session_id, data)
             self.send_response(200)
-        except Exception, e:
+        except Exception as e:
             self.send_response(500)
             err_lines = traceback.format_exc().splitlines()
             trace_string = '%s | %s' % (err_lines[-3], err_lines[-1])
             fault = jsonrpclib.Fault(-32603, 'Server error: %s' % trace_string)
             response = fault.response()
-            print "500", trace_string
+            print("500", trace_string)
         if response is None:
             response = ''
 
@@ -216,13 +216,13 @@ class StratumJSONRPCRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler
 
             response = self.server._marshaled_dispatch(session_id, data)
             self.send_response(200)
-        except Exception, e:
+        except Exception as e:
             self.send_response(500)
             err_lines = traceback.format_exc().splitlines()
             trace_string = '%s | %s' % (err_lines[-3], err_lines[-1])
             fault = jsonrpclib.Fault(-32603, 'Server error: %s' % trace_string)
             response = fault.response()
-            print "500", trace_string
+            print("500", trace_string)
         if response is None:
             response = ''
 
@@ -251,10 +251,10 @@ class SSLRequestHandler(StratumJSONRPCRequestHandler):
         self.connection.shutdown()
 
 
-class SSLTCPServer(SocketServer.TCPServer):
+class SSLTCPServer(socketserver.TCPServer):
     def __init__(self, server_address, certfile, keyfile, RequestHandlerClass, bind_and_activate=True):
         from OpenSSL import SSL
-        SocketServer.BaseServer.__init__(self, server_address, RequestHandlerClass)
+        socketserver.BaseServer.__init__(self, server_address, RequestHandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
         ctx.use_privatekey_file(keyfile)
         ctx.use_certificate_file(certfile)
@@ -268,7 +268,7 @@ class SSLTCPServer(SocketServer.TCPServer):
         pass
 
 
-class StratumHTTPServer(SocketServer.TCPServer, StratumJSONRPCDispatcher):
+class StratumHTTPServer(socketserver.TCPServer, StratumJSONRPCDispatcher):
 
     allow_reuse_address = True
 
@@ -291,7 +291,7 @@ class StratumHTTPServer(SocketServer.TCPServer, StratumJSONRPCDispatcher):
                 except OSError:
                     logging.warning("Could not unlink socket %s", addr)
 
-        SocketServer.TCPServer.__init__(self, addr, requestHandler, bind_and_activate)
+        socketserver.TCPServer.__init__(self, addr, requestHandler, bind_and_activate)
 
         if fcntl is not None and hasattr(fcntl, 'FD_CLOEXEC'):
             flags = fcntl.fcntl(self.fileno(), fcntl.F_GETFD)
@@ -336,7 +336,7 @@ class HttpSession(Session):
 
     def __init__(self, dispatcher, session_id):
         Session.__init__(self, dispatcher)
-        self.pending_responses = Queue.Queue()
+        self.pending_responses = queue.Queue()
         self.address = session_id
         self.name = "HTTP"
         self.timeout = 60
@@ -363,7 +363,7 @@ class HttpServer(threading.Thread):
 
     def run(self):
         # see http://code.google.com/p/jsonrpclib/
-        from SocketServer import ThreadingMixIn
+        from socketserver import ThreadingMixIn
         if self.use_ssl:
             class StratumThreadedServer(ThreadingMixIn, StratumHTTPSSLServer):
                 pass

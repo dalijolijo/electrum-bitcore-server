@@ -4,8 +4,8 @@ import hashlib
 import os
 import sys
 
-from processor import print_log, logger
-from utils import bc_address_to_hash_160, hash_160_to_pubkey_address, hex_to_int, int_to_hex, Hash
+from .processor import print_log, logger
+from .utils import bc_address_to_hash_160, hash_160_to_pubkey_address, hex_to_int, int_to_hex, Hash
 
 global GENESIS_HASH
 GENESIS_HASH = '604148281e5c4b7f2487e5d03cd60d8e6f69411d613f6448034508cea52e9574'
@@ -77,7 +77,7 @@ class Storage(object):
     def get_proof(self, addr):
         key = self.address_to_key(addr)
         i = self.db_utxo.iterator(start=key)
-        k, _ = i.next()
+        k, _ = next(i)
 
         p = self.get_path(k) 
         p.append(k)
@@ -93,7 +93,7 @@ class Storage(object):
     def get_balance(self, addr):
         key = self.address_to_key(addr)
         i = self.db_utxo.iterator(start=key)
-        k, _ = i.next()
+        k, _ = next(i)
         if not k.startswith(key): 
             return 0
         p = self.get_parent(k)
@@ -147,7 +147,7 @@ class Storage(object):
         # uniqueness
         out = set(out)
 
-        return map(lambda x: {'tx_hash':x[0], 'height':x[1]}, out)
+        return [{'tx_hash':x[0], 'height':x[1]} for x in out]
 
 
 
@@ -181,7 +181,7 @@ class Storage(object):
         k = 0
         serialized = ''
         for i in range(256):
-            if chr(i) in d.keys():
+            if chr(i) in list(d.keys()):
                 k += 1<<i
                 h, v = d[chr(i)]
                 if h is None: h = chr(0)*32
@@ -235,10 +235,10 @@ class Storage(object):
 
             items = self.get_node(key)
 
-            if word[0] in items.keys():
+            if word[0] in list(items.keys()):
   
                 i.seek(key + word[0])
-                new_key, _ = i.next()
+                new_key, _ = next(i)
 
                 if target.startswith(new_key):
                     # add value to the child node
@@ -298,7 +298,7 @@ class Storage(object):
 
         for i in range(KEYLENGTH, -1, -1):
 
-            for node in self.hash_list.keys():
+            for node in list(self.hash_list.keys()):
                 if len(node) != i: continue
 
                 node_hash, node_value = self.hash_list.pop(node)
@@ -318,7 +318,7 @@ class Storage(object):
                     assert d is not None
 
                 letter = node[len(parent)]
-                assert letter in d.keys()
+                assert letter in list(d.keys())
 
                 if i != KEYLENGTH and node_hash is None:
                     d2 = self.get_node(node)
@@ -337,7 +337,7 @@ class Storage(object):
         
         # batch write modified nodes 
         batch = self.db_utxo.write_batch()
-        for k, v in nodes.items():
+        for k, v in list(nodes.items()):
             self.put_node(k, v, batch)
         batch.write()
 
@@ -355,8 +355,8 @@ class Storage(object):
             skip_string = ''
 
         d2 = sorted(d.items())
-        values = map(lambda x: x[1][1], d2)
-        hashes = map(lambda x: x[1][0], d2)
+        values = [x[1][1] for x in d2]
+        hashes = [x[1][0] for x in d2]
         value = sum( values )
         _hash = self.hash( skip_string + ''.join(hashes) )
         return _hash, value
@@ -372,7 +372,7 @@ class Storage(object):
 
             i.seek(key + word[0])
             try:
-                new_key, _ = i.next()
+                new_key, _ = next(i)
                 is_child = new_key.startswith(key + word[0])
             except StopIteration:
                 is_child = False
@@ -417,7 +417,7 @@ class Storage(object):
 
         # remove key if it has a single child
         if len(items) == 1:
-            letter, v = items.items()[0]
+            letter, v = list(items.items())[0]
 
             self.db_utxo.delete(parent)
             if parent in self.hash_list: 
@@ -426,7 +426,7 @@ class Storage(object):
             # we need the exact length for the iteration
             i = self.db_utxo.iterator()
             i.seek(parent+letter)
-            k, v = i.next()
+            k, v = next(i)
 
             # note: k is not necessarily a leaf
             if len(k) == KEYLENGTH:
@@ -449,7 +449,7 @@ class Storage(object):
         l = 0
         while l <256:
             i.seek(x+chr(l))
-            k, v = i.next()
+            k, v = next(i)
             if k.startswith(x+chr(l)): 
                 yield k, v
                 l += 1
@@ -468,7 +468,7 @@ class Storage(object):
         for j in range(len(x)):
             p = x[0:-j-1]
             i.seek(p)
-            k, v = i.next()
+            k, v = next(i)
             if x.startswith(k) and x!=k: 
                 break
         else: raise
